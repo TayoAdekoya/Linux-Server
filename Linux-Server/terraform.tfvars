@@ -1,3 +1,5 @@
+# replace values with your own values
+
 resource_group_name        = "testRG12"
 resource_group_location    = "East US 2"
 vnet_name                  = "testVNet2"
