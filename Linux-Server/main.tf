@@ -1,42 +1,142 @@
 provider "azurerm" {
-  features {
-    resource_group {
-      prevent_deletion_if_contains_resources = false
-    }
-  }
-
+  features {}
 }
 
-resource "azurerm_resource_group" "RG" {
-  name     = var.resource_group_name
-  location = var.resource_group_location
+# creates a resource group
+resource "azurerm_resource_group" "rg" {
+  name     = "${var.name_prefix}-rg"
+  location = "${var.location}"
 }
 
-resource "azurerm_virtual_network" "VNet" {
-  name                = var.vnet_name
-  address_space       = ["10.0.0.0/16"]
-  location            = var.resource_group_location
-  resource_group_name = var.resource_group_name
+# creates a virtual network
+resource "azurerm_virtual_network" "vnet" {
+  name                = "${var.name_prefix}vnet"
+  location            = "${var.location}"
+  address_space       = ["${var.vnet_address_space}"]
+  resource_group_name = "${azurerm_resource_group.rg.name}"
 }
 
-resource "azurerm_subnet" "Subnet" {
-  name                 = var.subnet_name
-  resource_group_name  = var.resource_group_name
-  virtual_network_name = var.vnet_name
-  address_prefixes     = ["10.0.2.0/24"]
+# creates a subnet
+resource "azurerm_subnet" "subnet" {
+  name                 = "${var.name_prefix}subnet"
+  virtual_network_name = "${azurerm_virtual_network.vnet.name}"
+  resource_group_name  = "${azurerm_resource_group.rg.name}"
+  address_prefix       = "${var.subnet_address_space}"
 }
 
-resource "azurerm_network_interface" "NIC" {
-  name                = var.network_interface_name
-  location            = var.resource_group_location
-  resource_group_name = var.resource_group_name
+# creates a network security group
+resource "azurerm_network_security_group" "nsg" {
+  name                = "${var.name_prefix}nsg"
+  location            = "${var.location}"
+  resource_group_name = "${azurerm_resource_group.rg.name}"
+}
+
+# creates network security rules
+resource "azurerm_network_security_rule" "rulessh" {
+  name                        = "${var.name_prefix}rulessh"
+  priority                    = 100
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "22"
+  source_address_prefix       = "*"
+  destination_address_prefix  = "*"
+  resource_group_name         = "${azurerm_resource_group.rg.name}"
+  network_security_group_name = "${azurerm_network_security_group.nsg.name}"
+}
+
+# creates a netowrk interface
+resource "azurerm_network_interface" "nic" {
+  name                      = "${var.name_prefix}nic"
+  location                  = "${var.location}"
+  resource_group_name       = "${azurerm_resource_group.rg.name}"
+  network_security_group_id = "${azurerm_network_security_group.nsg.id}"
 
   ip_configuration {
-    name                          = var.ip_configuration_name
-    subnet_id                     = azurerm_subnet.Subnet.id 
-    private_ip_address_allocation = "Dynamic"
+    name                          = "${var.name_prefix}ipconfig"
+    subnet_id                     = "${azurerm_subnet.subnet.id}"
+    private_ip_address_allocation = "dynamic"
+    public_ip_address_id          = "${azurerm_public_ip.pip.id}"
   }
+
+  depends_on = ["azurerm_network_security_group.nsg"]
 }
+
+# creates public ip
+resource "azurerm_public_ip" "pip" {
+  name                         = "${var.name_prefix}-ip"
+  location                     = "${var.location}"
+  resource_group_name          = "${azurerm_resource_group.rg.name}"
+  public_ip_address_allocation = "dynamic"
+  domain_name_label            = "${var.hostname}"
+}
+
+# creates storage account
+resource "azurerm_storage_account" "stor" {
+  name                = "${var.hostname}stor"
+  location            = "${var.location}"
+  resource_group_name = "${azurerm_resource_group.rg.name}"
+  account_type        = "${var.storage_account_type}"
+}
+
+# creates storage container for virtual hard disk
+resource "azurerm_storage_container" "storc" {
+  name                  = "${var.name_prefix}-vhds"
+  resource_group_name   = "${azurerm_resource_group.rg.name}"
+  storage_account_name  = "${azurerm_storage_account.stor.name}"
+  container_access_type = "private"
+}
+
+# creates a linux virtual machine
+resource "azurerm_virtual_machine" "vm" {
+  name                  = "${var.name_prefix}vm"
+  location              = "${var.location}"
+  resource_group_name   = "${azurerm_resource_group.rg.name}"
+  vm_size               = "${var.vm_size}"
+  network_interface_ids = ["${azurerm_network_interface.nic.id}"]
+
+ storage_image_reference {
+    publisher = "${var.image_publisher}"
+    offer     = "${var.image_offer}"
+    sku       = "${var.image_sku}"
+    version   = "${var.image_version}"
+  }
+
+ storage_os_disk {
+    name          = "${var.name_prefix}osdisk"
+    vhd_uri       = "${azurerm_storage_account.stor.primary_blob_endpoint}${azurerm_storage_container.storc.name}/${var.name_prefix}osdisk.vhd"
+    caching       = "ReadWrite"
+    create_option = "FromImage"
+  }
+
+ os_profile {
+    computer_name  = "${var.hostname}"
+    admin_username = "${var.admin_username}"
+    admin_password = "${var.admin_password}"
+  }
+
+ os_profile_linux_config {
+    disable_password_authentication = "${var.disable_password_authentication}"
+
+    ssh_keys = [{
+      path     = "/home/${var.admin_username}/.ssh/authorized_keys"
+      key_data = "${var.ssh_public_key}"
+    }]
+  }
+
+  depends_on = ["azurerm_storage_account.stor"]
+}
+
+output "admin_username" {
+  value = "${var.admin_username}"
+}
+
+output "vm_fqdn" {
+  value = "${azurerm_public_ip.pip.fqdn}"
+}
+
+
 
 resource "azurerm_linux_virtual_machine" "LinuxVM" {
   name                = var.linux_virtual_machine_name

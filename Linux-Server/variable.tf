@@ -1,49 +1,74 @@
-variable "resource_group_name" {
- type        = string
- description = "RG name"
+
+# required variables
+variable "hostname" {
+  description = "name of the machine to create"
 }
 
-variable "resource_group_location" {
- type        = string
- description = "RG location"
+variable "name_prefix" {
+  description = "unique part of the name to give to resources"
 }
 
-variable "vnet_name" {
- type        = string
- description = "VNet name"
+variable "ssh_public_key" {
+  description = "public key for ssh access"
 }
 
-variable "subnet_name" {
- type        = string
- description = "Subnet name"
+# optional variables
+variable "location" {
+  description = "region where the resources should exist"
+  default     = "eastus"
 }
 
-variable "network_interface_name" {
- type        = string
- description = "NIC name"
+variable "vnet_address_space" {
+  description = "full address space allowed to the virtual network"
+  default     = "10.0.0.0/16"
 }
 
-variable "ip_configuration_name" {
- type        = string
- description = "IP configuration name"
+variable "subnet_address_space" {
+  description = "the subset of the virtual network for this subnet"
+  default     = "10.0.10.0/24"
 }
 
-variable "linux_virtual_machine_name" {
- type        = string
- description = "Linux VM name"
+variable "storage_account_type" {
+  description = "type of storage account"
+  default     = "Standard_LRS"
 }
 
-variable "linux_virtual_machine_size" {
- type        = string
- description = "Linux VM size"
+variable "vm_size" {
+  description = "size of the vm to create"
+  default     = "Standard_A0"
+}
+
+variable "image_publisher" {
+  description = "name of the publisher of the image (az vm image list)"
+  default     = "Canonical"
+}
+
+variable "image_offer" {
+  description = "the name of the offer (az vm image list)"
+  default     = "UbuntuServer"
+}
+
+variable "image_sku" {
+  description = "image sku to apply (az vm image list)"
+  default     = "16.04-LTS"
+}
+
+variable "image_version" {
+  description = "version of the image to apply (az vm image list)"
+  default     = "latest"
 }
 
 variable "admin_username" {
- type        = string
- description = "Admin username"
+  description = "administrator user name"
+  default     = "vmadmin"
 }
 
 variable "admin_password" {
- type        = string
- description = "Admin Password"
+  description = "administrator password (recommended to disable password auth)"
+  default     = "notused"
+}
+
+variable "disable_password_authentication" {
+  description = "toggle for password auth (recommended to keep disabled)"
+  default     = true
 }
