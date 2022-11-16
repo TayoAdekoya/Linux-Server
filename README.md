@@ -1,27 +1,27 @@
  # Linux VM Provisioning with Terraform
 Quickly create a single Linux VM in Azure, with sane and secure defaults
 
-Requirements
+# Requirements
 Terraform
 Azure Subscription
-Setup and Configuration
+
+# Setup and Configuration
 Ensure that you have Terraform installed. If you don't, you can reference the official Terraform documentation on installing...
 
 which terraform
 The Azure provider in Terraform requires the following environment variables defined...
-
-ARM_SUBSCRIPTION_ID
-ARM_TENANT_ID
-ARM_CLIENT_SECRET
-ARM_CLIENT_ID
+ ARM_SUBSCRIPTION_ID
+ ARM_TENANT_ID
+ ARM_CLIENT_SECRET
+ ARM_CLIENT_ID 
 Follow the instructions here on how to create application credentials required for the above variables.
 
-Provisioning
+# Provisioning
 There are two ways to use this to provision...
+ 1.Clone to git repository and run the module directly
+ 2.Create a new Terraform module that sources this remote module
 
-Clone to git repository and run the module directly
-Create a new Terraform module that sources this remote module
-Source this remote module
+# Source this remote module
 This is approach #2 from above. You can create a base module locally to source this module...
 
 module "azlinuxvm" {
@@ -31,6 +31,7 @@ module "azlinuxvm" {
   hostname       = "myhostname"
   ssh_public_key = "${file("/home/yourlocaluser/.ssh/id_rsa.pub")}"
 }
+
 Then run terraform get to pull this module, and terraform plan to see what will happen, and lastly terraform apply to kick off the provisioning.
 
 Run module directly
