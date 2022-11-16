@@ -1,4 +1,4 @@
-Linux VM Provisioning with Terraform
+ # Linux VM Provisioning with Terraform
 Quickly create a single Linux VM in Azure, with sane and secure defaults
 
 Requirements
