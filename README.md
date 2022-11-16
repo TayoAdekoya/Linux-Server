@@ -10,16 +10,16 @@ Ensure that you have Terraform installed. If you don't, you can reference the of
 
 which terraform
 The Azure provider in Terraform requires the following environment variables defined...
- ARM_SUBSCRIPTION_ID
- ARM_TENANT_ID
- ARM_CLIENT_SECRET
- ARM_CLIENT_ID 
+ARM_SUBSCRIPTION_ID
+ARM_TENANT_ID
+ARM_CLIENT_SECRET
+ARM_CLIENT_ID 
 Follow the instructions here on how to create application credentials required for the above variables.
 
 # Provisioning
 There are two ways to use this to provision...
- 1.Clone to git repository and run the module directly
- 2.Create a new Terraform module that sources this remote module
+1.Clone to git repository and run the module directly
+2.Create a new Terraform module that sources this remote module
 
 # Source this remote module
 This is approach #2 from above. You can create a base module locally to source this module...
@@ -34,7 +34,7 @@ module "azlinuxvm" {
 
 Then run terraform get to pull this module, and terraform plan to see what will happen, and lastly terraform apply to kick off the provisioning.
 
-Run module directly
+# Run module directly
 Clone this repository...
 
 $ git clone https://github.com/tstringer/terraform-azure-linux-vm.git
@@ -49,5 +49,6 @@ terraform apply -var "name_prefix=linux" -var "hostname=linux$(echo $RANDOM)" -v
 name_prefix (what to prefix your Azure resources with)
 hostname (this will be the public DNS name, recommended to randomize it to prevent likeliness of collisions)
 ssh_public_key (your public key). To see optional variables and their defaults, take a look at vars.tf
-Output
+
+# Output
 After you run this Terraform module, there will be two outputs: admin_username and vm_fqdn. These two pieces are what you need to then immediately ssh into your new Linux machine.
