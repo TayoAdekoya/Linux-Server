@@ -1,0 +1,38 @@
+-1. defined my module provider which is azurerm
+
+-note = The variable tf file contains the definition of all resources, to be defined
+at deployment e.g. name, location, resource group name, address prefixes, etc.
+
+-2. created a resource group to group all my resources together. 
+using  variables, the resource name and location will be defined at deployment
+
+-3. created a virtual network to enable the resources to securely communicate 
+with each other, the internet, and on-prem networks.
+
+-4. created a subnet to segment the virtual network address space into segments
+that are appropriate for the internal network workload. 
+
+-5. created a network security group to filter network traffic to and from all 
+resources connected to the virtual network. 
+
+-6. created network security rules, with priority at 100, transmission control protocol (TCP)
+traffic direction set as inbound, access set as allow, destination port range set as 22
+
+-7. created a network interface to provide each vm with a dedicated, full time 
+connection to the internet, with a ip address to enable inbound communication to the
+VM from the internet and enables outbound communication from the virtual machine to the 
+internet using a predictable ip address. 
+
+-8. created a public ip address to serve as an internet-facing frontend ip 
+configuration
+
+-9. created a storage account and a container in the storage account to store the 
+virtual hard disk used by the Linux vm.
+
+-10. created a Linux vm with an image reference, os disk, os profile, and 
+os profile config with password authentication and ssh keys, which all depends
+on the storage account. 
+
+-11. After you run this Terraform module, there will be two outputs:
+`admin_username` and `vm_fqdn` (fully qualified domain name). 
+These two pieces are what you need to then immediately ssh into your new Linux machine.
