@@ -33,6 +33,11 @@ variable "storage_account_type" {
   default     = "Standard_LRS"
 }
 
+variable "storage_replication_type" {
+  description = "type of storage replication"
+  default     = "GRS"
+}
+
 variable "vm_size" {
   description = "size of the vm to create"
   default     = "Standard_A0"
