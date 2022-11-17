@@ -18,10 +18,10 @@ resource "azurerm_virtual_network" "vnet" {
 
 # creates a subnet
 resource "azurerm_subnet" "subnet" {
-  name                 = "${var.name_prefix}subnet"
-  virtual_network_name = "${azurerm_virtual_network.vnet.name}"
-  resource_group_name  = "${azurerm_resource_group.rg.name}"
-  address_prefix       = "${var.subnet_address_space}"
+  name                   = "${var.name_prefix}subnet"
+  virtual_network_name   = "${azurerm_virtual_network.vnet.name}"
+  resource_group_name    = "${azurerm_resource_group.rg.name}"
+  address_prefixes       = "${var.subnet_address_space}"
 }
 
 # creates a network security group
@@ -60,7 +60,7 @@ resource "azurerm_network_interface" "nic" {
     public_ip_address_id          = "${azurerm_public_ip.pip.id}"
   }
 
-  depends_on = ["azurerm_network_security_group.nsg"]
+  depends_on = "azurerm_network_security_group.nsg"
 }
 
 # creates public ip
@@ -68,16 +68,17 @@ resource "azurerm_public_ip" "pip" {
   name                         = "${var.name_prefix}-ip"
   location                     = "${var.location}"
   resource_group_name          = "${azurerm_resource_group.rg.name}"
-  public_ip_address_allocation = "dynamic"
+  allocation_method            = "dynamic"
   domain_name_label            = "${var.hostname}"
 }
 
 # creates storage account
 resource "azurerm_storage_account" "stor" {
-  name                = "${var.hostname}stor"
-  location            = "${var.location}"
-  resource_group_name = "${azurerm_resource_group.rg.name}"
-  account_type        = "${var.storage_account_type}"
+  name                     = "${var.hostname}stor"
+  location                 = "${var.location}"
+  resource_group_name      = "${azurerm_resource_group.rg.name}"
+  account_tier             = "${var.storage_account_type}"
+  account_replication_type = "${var.storage_replication_type}"
 }
 
 # creates storage container for virtual hard disk
@@ -125,7 +126,7 @@ resource "azurerm_virtual_machine" "vm" {
     }]
   }
 
-  depends_on = ["azurerm_storage_account.stor"]
+  depends_on = "azurerm_storage_account.stor"
 }
 
 output "admin_username" {
