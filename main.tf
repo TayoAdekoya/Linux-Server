@@ -51,16 +51,12 @@ resource "azurerm_network_interface" "nic" {
   name                      = "${var.name_prefix}nic"
   location                  = "${var.location}"
   resource_group_name       = "${azurerm_resource_group.rg.name}"
-  network_security_group_id = "${azurerm_network_security_group.nsg.id}"
 
   ip_configuration {
     name                          = "${var.name_prefix}ipconfig"
     subnet_id                     = "${azurerm_subnet.subnet.id}"
-    private_ip_address_allocation = "dynamic"
-    public_ip_address_id          = "${azurerm_public_ip.pip.id}"
+    private_ip_address_allocation = "Dynamic"
   }
-
-  depends_on = "azurerm_network_security_group.nsg"
 }
 
 # creates public ip
@@ -84,7 +80,6 @@ resource "azurerm_storage_account" "stor" {
 # creates storage container for virtual hard disk
 resource "azurerm_storage_container" "storc" {
   name                  = "${var.name_prefix}-vhds"
-  resource_group_name   = "${azurerm_resource_group.rg.name}"
   storage_account_name  = "${azurerm_storage_account.stor.name}"
   container_access_type = "private"
 }
@@ -120,13 +115,11 @@ resource "azurerm_virtual_machine" "vm" {
  os_profile_linux_config {
     disable_password_authentication = "${var.disable_password_authentication}"
 
-    ssh_keys = [{
+    ssh_keys {
       path     = "/home/${var.admin_username}/.ssh/authorized_keys"
       key_data = "${var.ssh_public_key}"
-    }]
+    }
   }
-
-  depends_on = "azurerm_storage_account.stor"
 }
 
 output "admin_username" {
