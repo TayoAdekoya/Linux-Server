@@ -25,12 +25,12 @@ variable "vnet_address_space" {
 
 variable "subnet_address_space" {
   description = "the subset of the virtual network for this subnet"
-  default     = "10.0.10.0/24"
+  default     = ["10.0.10.0/24"]
 }
 
 variable "storage_account_type" {
   description = "type of storage account"
-  default     = "Standard_LRS"
+  default     = "Standard"
 }
 
 variable "storage_replication_type" {
